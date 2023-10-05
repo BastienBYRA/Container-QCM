@@ -5,7 +5,7 @@ services:
     container_name: node-app
     restart: always
     ports:
-      - "${NODE_PORT}:${NODE_PORT}"
+      - "${NODE_PORT}:4000"
     depends_on:
       mongodb:
         condition: service_healthy
@@ -14,17 +14,16 @@ services:
 
   mongodb:
     image: mongo
-    command: --port ${MONGO_PORT}
+    # command: --port ${MONGO_PORT}
     ports:
-      - "${MONGO_PORT}:${MONGO_PORT}"
+      - "${MONGO_PORT}:27017"
     volumes:
-      # - ./_data/MO:/data/db
       - mongo_data:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:${MONGO_PORT}/test --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       timeout: 10s
       retries: 5
@@ -42,10 +41,10 @@ services:
       - ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGO_USERNAME}
       - ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGO_PASSWORD}
       - ME_CONFIG_BASICAUTH="true"
-      - ME_CONFIG_BASICAUTH_USERNAME=jack
-      - ME_CONFIG_BASICAUTH_PASSWORD=bob
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGOEXPRESS_UI_USERNAME}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGOEXPRESS_UI_PASSWORD}
       - ME_CONFIG_MONGODB_SERVER=mongodb
-      - ME_CONFIG_MONGODB_PORT=${MONGO_PORT}
+      - ME_CONFIG_MONGODB_PORT=27017
     depends_on:
       mongodb:
         condition: service_healthy

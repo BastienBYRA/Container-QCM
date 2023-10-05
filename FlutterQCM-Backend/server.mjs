@@ -11,11 +11,13 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Retrieve environment variables
-const PORT = process.env.NODE_PORT || 4000;
-const MONGO_PORT = process.env.MONGO_PORT || 27017;
-const MONGO_CONNECTION_STRING =
-  "mongodb://mongodb:" + MONGO_PORT + "/qcm?authSource=admin" ||
-  "mongodb://mongodb:27017/qcm?authSource=admin";
+const PORT = 4000;
+// const PORT = process.env.NODE_PORT || 4000;
+// const MONGO_PORT = process.env.MONGO_PORT || 27017;
+// const MONGO_CONNECTION_STRING =
+//   "mongodb://mongodb:" + MONGO_PORT + "/qcm?authSource=admin" ||
+//   "mongodb://mongodb:27017/qcm?authSource=admin";
+const MONGO_CONNECTION_STRING = "mongodb://mongodb:27017/qcm?authSource=admin";
 const MONGO_ADMIN_USERNAME = process.env.MONGO_USERNAME || "admin";
 const MONGO_ADMIN_PASSWORD = process.env.MONGO_PASSWORD || "password";
 
