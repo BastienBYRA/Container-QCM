@@ -15,4 +15,4 @@ source ./FlutterQCM-Backend/.env
 docker build -t "$NODE_IMAGE_NAME:$NODE_IMAGE_TAG" ./FlutterQCM-Backend
 
 # Run the docker compose
-docker compose --env-file "./FlutterQCM-Backend/.env" up
+docker compose --env-file "./FlutterQCM-Backend/.env" up -d --build
