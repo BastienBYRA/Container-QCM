@@ -1,0 +1,47 @@
+<form style="display:inline-flex; gap:12px;" method="get" action="/">
+  <input value="{{ search }}" class="input" type="text" name="search" placeholder="firstName, lastName or email" />
+  <input class="button is-link is-light" type="submit" value="Search" />
+  <input class="button is-danger" type="button" value="Reset" onclick="window.location.href='/'">
+</form>
+
+<br /><br />
+
+<a class="button" href="/add">
+  Add new user
+</a>
+<div class="card">
+  <div class="card-content">
+    <table class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th>Lastname</th>
+          <th>Firstname</th>
+          <th>Email</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if users}}
+          {{#each users}}
+          <tr>
+            <td>{{this.lastName}}</td>
+            <td>{{this.firstName}}</td>
+            <td>{{this.email}}</td>
+            <td style="display: inline-flex; gap: 8px;">
+              <a class="button is-success is-light" href='/edit/{{this._id}}'>Edit</a>
+
+              <form method="post" action="/delete">
+                <input type="hidden" name="id" value="{{this._id}}">
+                <input class="button is-danger is-light" type="submit" value="Delete"> 
+              </form>
+
+            </td>
+          </tr>
+          {{/each}}
+        {{else}}
+          <td>There no user</td>
+        {{/if}}
+      </tbody>
+    </table>
+  </div>
+</div>

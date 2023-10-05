@@ -1,0 +1,54 @@
+version: "3"
+services:
+  web:
+    image: "${NODE_IMAGE_NAME}:${NODE_IMAGE_TAG}"
+    container_name: node-app
+    restart: always
+    ports:
+      - "${NODE_PORT}:${NODE_PORT}"
+    depends_on:
+      - mongodb
+    #    env_file:
+    #      - ./FlutterQCM-Backend/.env
+    networks:
+      - nodejs_app
+
+  mongodb:
+    image: mongo
+    command: --port ${MONGO_PORT}
+    # ports:
+    #   - "${MONGO_PORT}:${MONGO_PORT}"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:${MONGO_PORT}/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - nodejs_app
+
+  mongo-express:
+    image: mongo-express
+    ports:
+      - "${MONGO_EXPRESS_PORT}:8081"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_USERNAME}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_PASSWORD}
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_PORT=${MONGO_PORT}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - nodejs_app
+
+volumes:
+  mongodb_data:
+
+networks:
+  nodejs_app:

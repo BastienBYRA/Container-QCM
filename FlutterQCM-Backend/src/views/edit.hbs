@@ -1,0 +1,38 @@
+{{#if errorMessage}}
+  <div class="alert">
+    <p class="has-text-danger">{{errorMessage}}</p>
+  </div>
+{{/if}}
+<div class="card">
+  <div class="card-content">
+  {{#if user._id}}
+    <form method="POST" action="/edit/{{user._id}}" novalidate>
+  {{else}}
+    <form method="POST" action="/add" novalidate>
+  {{/if}}
+      <div class="field">
+        <div class="control">
+          <input class="input" name="firstName" type="text" placeholder='First name' value="{{user.firstName}}">
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <input class="input" name="lastName" type="text" placeholder='Last name' value="{{user.lastName}}">
+        </div>
+      </div>
+      <div class="field">
+        <div class="control">
+          <input class="input" name="email" type="email" placeholder='Email address' value="{{user.email}}">
+        </div>
+      </div>
+      <div class="content">
+        <a class="button" href="/">
+          Cancel
+        </a>
+        <button class="button" type="submit">
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
