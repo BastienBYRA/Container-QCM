@@ -1,3 +1,10 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 void main() {
   runApp(QcmApp());
 }
@@ -14,7 +21,7 @@ class QcmApp extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else {
-            List<Question> questions = snapshot.data;
+            List<Question> questions = snapshot.data as List<Question>;
             return QcmScreen(questions: questions);
           }
         },
@@ -29,8 +36,8 @@ class QcmApp extends StatelessWidget {
       List<Map<String, dynamic>> data = json.decode(response.body);
       return data.map((questionData) {
         List<Response> responses = questionData['responses']
-            .map<Response>((response) =>
-                Response(response['name'], response['isCorrect']))
+            .map<Response>(
+                (response) => Response(response['name'], response['isCorrect']))
             .toList();
         return Question(questionData['question'], responses);
       }).toList();
@@ -54,8 +61,8 @@ class _QcmScreenState extends State<QcmScreen> {
   int score = 0; // Score du joueur
 
   void checkAnswer(String selectedAnswer) {
-    bool isCorrect = widget.questions[questionIndex]
-        .answerOptions.firstWhere((option) => option.responseText == selectedAnswer)
+    bool isCorrect = widget.questions[questionIndex].answerOptions
+        .firstWhere((option) => option.responseText == selectedAnswer)
         .isCorrect;
 
     if (isCorrect) {
@@ -78,8 +85,8 @@ class _QcmScreenState extends State<QcmScreen> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Score final'),
-            content:
-                Text('Vous avez obtenu $score sur ${widget.questions.length} questions.'),
+            content: Text(
+                'Vous avez obtenu $score sur ${widget.questions.length} questions.'),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
@@ -118,8 +125,7 @@ class _QcmScreenState extends State<QcmScreen> {
             ),
             SizedBox(height: 20.0),
             Column(
-              children: widget.questions[questionIndex]
-                  .answerOptions
+              children: widget.questions[questionIndex].answerOptions
                   .map(
                     (option) => ElevatedButton(
                       onPressed: () => checkAnswer(option.responseText),
