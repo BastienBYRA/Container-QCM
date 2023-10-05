@@ -7,7 +7,8 @@ services:
     ports:
       - "${NODE_PORT}:${NODE_PORT}"
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
       - nodejs_app
 
@@ -17,7 +18,8 @@ services:
     ports:
       - "${MONGO_PORT}:${MONGO_PORT}"
     volumes:
-      - ./_data/MO:/data/db
+      # - ./_data/MO:/data/db
+      - mongo_data:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
@@ -49,6 +51,9 @@ services:
         condition: service_healthy
     networks:
       - nodejs_app
+
+volumes:
+  mongo_data:
 
 networks:
   nodejs_app:

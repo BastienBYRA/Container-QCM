@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 void main() {
   runApp(QcmApp());
 }
@@ -8,57 +6,59 @@ class QcmApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: QcmScreen(),
+      home: FutureBuilder(
+        future: fetchQuestions(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            List<Question> questions = snapshot.data;
+            return QcmScreen(questions: questions);
+          }
+        },
+      ),
     );
+  }
+
+  Future<List<Question>> fetchQuestions() async {
+    final response = await http.get(Uri.parse('http://localhost:3000/'));
+
+    if (response.statusCode == 200) {
+      List<Map<String, dynamic>> data = json.decode(response.body);
+      return data.map((questionData) {
+        List<Response> responses = questionData['responses']
+            .map<Response>((response) =>
+                Response(response['name'], response['isCorrect']))
+            .toList();
+        return Question(questionData['question'], responses);
+      }).toList();
+    } else {
+      throw Exception('Failed to load questions');
+    }
   }
 }
 
 class QcmScreen extends StatefulWidget {
+  final List<Question> questions;
+
+  QcmScreen({required this.questions});
+
   @override
   _QcmScreenState createState() => _QcmScreenState();
 }
 
 class _QcmScreenState extends State<QcmScreen> {
-  // Liste de questions et de réponses
-  List<Question> questions = [
-    Question(
-      "Qu'est ce que Docker ?",
-      [
-        'un outil conçu pour aider les développeurs à créer et gérer leurs applications de manière simple et organisée',
-        'un serveur de data sans OS',
-        'un ouvrier employé au chargement et au déchargement des navires',
-        'La mer noire'
-      ],
-      'un outil conçu pour aider les développeurs à créer et gérer leurs applications de manière simple et organisée',
-    ),
-    Question(
-      'Que sont les conteneurs ?',
-      [
-        'une grosse boite sur un bateau',
-        'un outil',
-        'un outil que Docker utilise pour regrouper et expédier les applications de développement vers leur destination cible',
-        'La mer noire'
-      ],
-      'un outil que Docker utilise pour regrouper et expédier les applications de développement vers leur destination cible',
-    ),
-    Question(
-      "Qu'est-ce qu'un fichier Dockerfile?",
-      [
-        'Un fichier yml',
-        'Un fichier JPEG ',
-        'La mer noire',
-        "Un ensemble d'instructions"
-      ],
-      "Un ensemble d'instructions",
-    ),
-  ];
-
   int questionIndex = 0; // Index de la question actuelle
   int score = 0; // Score du joueur
 
   void checkAnswer(String selectedAnswer) {
-    String correctAnswer = questions[questionIndex].correctAnswer;
-    if (selectedAnswer == correctAnswer) {
+    bool isCorrect = widget.questions[questionIndex]
+        .answerOptions.firstWhere((option) => option.responseText == selectedAnswer)
+        .isCorrect;
+
+    if (isCorrect) {
       setState(() {
         score++;
       });
@@ -67,7 +67,7 @@ class _QcmScreenState extends State<QcmScreen> {
   }
 
   void nextQuestion() {
-    if (questionIndex < questions.length - 1) {
+    if (questionIndex < widget.questions.length - 1) {
       setState(() {
         questionIndex++;
       });
@@ -78,8 +78,8 @@ class _QcmScreenState extends State<QcmScreen> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Score final'),
-            content: Text(
-                'Vous avez obtenu $score sur ${questions.length} questions.'),
+            content:
+                Text('Vous avez obtenu $score sur ${widget.questions.length} questions.'),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
@@ -113,17 +113,17 @@ class _QcmScreenState extends State<QcmScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              questions[questionIndex].questionText,
+              widget.questions[questionIndex].questionText,
               style: TextStyle(fontSize: 20.0),
             ),
             SizedBox(height: 20.0),
             Column(
-              children: questions[questionIndex]
+              children: widget.questions[questionIndex]
                   .answerOptions
                   .map(
                     (option) => ElevatedButton(
-                      onPressed: () => checkAnswer(option),
-                      child: Text(option),
+                      onPressed: () => checkAnswer(option.responseText),
+                      child: Text(option.responseText),
                     ),
                   )
                   .toList(),
@@ -137,8 +137,14 @@ class _QcmScreenState extends State<QcmScreen> {
 
 class Question {
   String questionText;
-  List<String> answerOptions;
-  String correctAnswer;
+  List<Response> answerOptions;
 
-  Question(this.questionText, this.answerOptions, this.correctAnswer);
+  Question(this.questionText, this.answerOptions);
+}
+
+class Response {
+  String responseText;
+  bool isCorrect;
+
+  Response(this.responseText, this.isCorrect);
 }
